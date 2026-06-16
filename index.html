@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Meter - Customer Portal</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* ===== ELECTRICAL THEME - SAME AS YOUR DESIGN ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 30% 40%, #0f1a2b, #05080f);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0, 255, 200, 0.025) 40px, rgba(0, 255, 200, 0.025) 41px),
+                repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0, 255, 200, 0.025) 40px, rgba(0, 255, 200, 0.025) 41px);
+            animation: gridPulse 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .particle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: #6af5ff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #6af5ff, 0 0 40px rgba(74, 240, 255, 0.4);
+            pointer-events: none;
+            z-index: 0;
+            animation: floatParticle linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        .lightning-arc {
+            position: fixed;
+            top: 5%;
+            right: 5%;
+            font-size: 8rem;
+            color: rgba(106, 245, 255, 0.08);
+            transform: rotate(15deg);
+            pointer-events: none;
+            z-index: 0;
+            animation: arcGlow 4s ease-in-out infinite;
+        }
+
+        .lightning-arc-left {
+            position: fixed;
+            bottom: 5%;
+            left: 5%;
+            font-size: 6rem;
+            color: rgba(106, 245, 255, 0.06);
+            transform: rotate(-20deg);
+            pointer-events: none;
+            z-index: 0;
+            animation: arcGlow 5s ease-in-out infinite reverse;
+        }
+
+        @keyframes arcGlow {
+            0%, 100% { opacity: 0.5; text-shadow: 0 0 30px rgba(74, 240, 255, 0.15); }
+            50% { opacity: 1; text-shadow: 0 0 60px rgba(74, 240, 255, 0.3); }
+        }
+
+        /* ===== LOGIN SCREEN ===== */
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-container .glass-wrap {
+            background: rgba(6, 14, 26, 0.75);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border-radius: 32px;
+            box-shadow: 
+                0 0 60px rgba(74, 240, 255, 0.08),
+                0 0 120px rgba(74, 240, 255, 0.03),
+                inset 0 0 80px rgba(74, 240, 255, 0.03);
+            border: 1px solid rgba(74, 240, 255, 0.12);
+            padding: 2.4rem 1.8rem 2.8rem;
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .login-container .glass-wrap::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 34px;
+            padding: 2px;
+            background: conic-gradient(from 0deg, transparent, rgba(74, 240, 255, 0.2), transparent, rgba(74, 240, 255, 0.1), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .logo {
+            text-align: center;
+            padding: 10px 0 20px;
+        }
+
+        .logo .logo-icon {
+            font-size: 4rem;
+            background: linear-gradient(145deg, #8af5ff, #4ac8e0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            filter: drop-shadow(0 0 30px rgba(74, 240, 255, 0.5)) drop-shadow(0 0 80px rgba(74, 240, 255, 0.2));
+            animation: boltPulse 3s ease-in-out infinite;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        @keyframes boltPulse {
+            0%, 100% { filter: drop-shadow(0 0 30px rgba(74, 240, 255, 0.5)) drop-shadow(0 0 80px rgba(74, 240, 255, 0.2)); }
+            50% { filter: drop-shadow(0 0 50px rgba(74, 240, 255, 0.8)) drop-shadow(0 0 100px rgba(74, 240, 255, 0.35)); }
+        }
+
+        .logo h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #c0f5ff, #6ad8e8, #c0f5ff);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: textShimmer 4s ease-in-out infinite;
+            text-shadow: 0 0 40px rgba(74, 240, 255, 0.15);
+        }
+
+        @keyframes textShimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .logo .sub {
+            color: rgba(74, 240, 255, 0.4);
+            font-size: 0.75rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-top: 0.3rem;
+            text-shadow: 0 0 30px rgba(74, 240, 255, 0.1);
+        }
+
+        .voltage-line {
+            width: 60%;
+            height: 2px;
+            margin: 0.8rem auto 0;
+            background: linear-gradient(90deg, transparent, rgba(74, 240, 255, 0.4), transparent);
+            position: relative;
+        }
+
+        .voltage-line::after {
+            content: '⚡';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            color: rgba(74, 240, 255, 0.3);
+        }
+
+        .login-card {
+            background: transparent;
+            border-radius: 20px;
+            padding: 10px 0 0;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(74, 240, 255, 0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(74, 240, 255, 0.08);
+            transition: border 0.3s, box-shadow 0.3s, background 0.3s;
+            backdrop-filter: blur(4px);
+            margin-bottom: 1.2rem;
+        }
+
+        .input-group::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10%;
+            height: 80%;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, rgba(74, 240, 255, 0.25), transparent);
+            transition: 0.3s;
+        }
+
+        .input-group:focus-within {
+            border-color: rgba(74, 240, 255, 0.3);
+            box-shadow: 0 0 30px rgba(74, 240, 255, 0.08), inset 0 0 30px rgba(74, 240, 255, 0.04);
+            background: rgba(74, 240, 255, 0.06);
+        }
+
+        .input-group:focus-within::before {
+            background: linear-gradient(to bottom, transparent, #6af5ff, transparent);
+            width: 2px;
+            box-shadow: 0 0 20px #6af5ff88;
+        }
+
+        .input-group i {
+            color: rgba(74, 240, 255, 0.3);
+            font-size: 1rem;
+            margin-left: 1.4rem;
+            width: 1.2rem;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        .input-group:focus-within i {
+            color: #6af5ff;
+            transform: scale(1.05);
+            text-shadow: 0 0 30px rgba(74, 240, 255, 0.3);
+        }
+
+        .input-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 1rem 1.4rem 1rem 1rem;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.9);
+            outline: none;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+            font-weight: 300;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .input-group .input-pulse {
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(74, 240, 255, 0.08), transparent);
+            transition: 0.3s;
+        }
+
+        .input-group:focus-within .input-pulse {
+            background: linear-gradient(90deg, transparent, rgba(74, 240, 255, 0.4), transparent);
+            box-shadow: 0 0 25px rgba(74, 240, 255, 0.08);
+            height: 2px;
+        }
+
+        .btn-login {
+            width: 100%;
+            margin-top: 1rem;
+            background: linear-gradient(145deg, rgba(74, 240, 255, 0.12), rgba(74, 240, 255, 0.03));
+            border: 1px solid rgba(74, 240, 255, 0.1);
+            padding: 1rem 1.8rem;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.85);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, rgba(74, 240, 255, 0.08), transparent);
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            border-color: rgba(74, 240, 255, 0.25);
+            box-shadow: 0 0 40px rgba(74, 240, 255, 0.08), inset 0 0 40px rgba(74, 240, 255, 0.03);
+            transform: scale(1.01);
+            color: white;
+        }
+
+        .btn-login:hover::before {
+            opacity: 1;
+        }
+
+        .btn-login:active {
+            transform: scale(0.97);
+        }
+
+        .btn-login i {
+            font-size: 1rem;
+            transition: transform 0.3s;
+            color: rgba(74, 240, 255, 0.4);
+        }
+
+        .btn-login:hover i {
+            transform: translateX(5px) scale(1.1);
+            color: #6af5ff;
+            text-shadow: 0 0 30px rgba(74, 240, 255, 0.3);
+        }
+
+        .login-footnote {
+            text-align: center;
+            margin-top: 1.8rem;
+            color: rgba(74, 240, 255, 0.2);
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .login-footnote .dot {
+            width: 3px;
+            height: 3px;
+            background: rgba(74, 240, 255, 0.15);
+            border-radius: 50%;
+        }
+
+        .login-footnote .pulse-dot {
+            width: 4px;
+            height: 4px;
+            background: rgba(74, 240, 255, 0.25);
+            border-radius: 50%;
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.5); }
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard {
+            display: none;
+            padding-bottom: 80px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: rgba(6, 14, 26, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 15px 20px;
+            box-shadow: 0 2px 30px rgba(0,0,0,0.5), 0 0 50px rgba(74, 240, 255, 0.03);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(74, 240, 255, 0.08);
+        }
+
+        .header-content {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .meter-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .meter-info i {
+            font-size: 24px;
+            color: #6af5ff;
+            filter: drop-shadow(0 0 15px rgba(74, 240, 255, 0.3));
+        }
+
+        .meter-id {
+            font-weight: bold;
+            font-size: 18px;
+            color: #c0f5ff;
+            text-shadow: 0 0 30px rgba(74, 240, 255, 0.15);
+        }
+
+        .btn-logout {
+            background: rgba(74, 240, 255, 0.06);
+            border: 1px solid rgba(74, 240, 255, 0.08);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 0.5rem 1.2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 70, 70, 0.15);
+            border-color: rgba(255, 100, 100, 0.25);
+            color: #ff9a9a;
+        }
+
+        .dashboard-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: rgba(6, 14, 26, 0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(74, 240, 255, 0.06);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(74, 240, 255, 0.1);
+            box-shadow: 0 4px 40px rgba(0,0,0,0.5), 0 0 30px rgba(74, 240, 255, 0.02);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(74, 240, 255, 0.06);
+        }
+
+        .card-title i {
+            font-size: 20px;
+            color: #6af5ff;
+            filter: drop-shadow(0 0 15px rgba(74, 240, 255, 0.2));
+        }
+
+        .card-title span {
+            color: #c0f5ff;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .readings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .reading-box {
+            background: rgba(74, 240, 255, 0.03);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(74, 240, 255, 0.04);
+            transition: 0.3s;
+        }
+
+        .reading-box:hover {
+            background: rgba(74, 240, 255, 0.05);
+            border-color: rgba(74, 240, 255, 0.08);
+        }
+
+        .reading-label {
+            font-size: 12px;
+            color: rgba(74, 240, 255, 0.4);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .reading-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #c0f5ff;
+            text-shadow: 0 0 30px rgba(74, 240, 255, 0.08);
+        }
+
+        .reading-unit {
+            font-size: 12px;
+            color: rgba(74, 240, 255, 0.25);
+        }
+
+        .balance-card {
+            background: rgba(74, 240, 255, 0.03);
+            text-align: center;
+            border: 1px solid rgba(74, 240, 255, 0.06);
+        }
+
+        .balance-amount {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #c0f5ff;
+            text-shadow: 0 0 40px rgba(74, 240, 255, 0.15);
+        }
+
+        .balance-label-small {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-top: 5px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .vat-status {
+            background: rgba(255, 193, 7, 0.03);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-top: 12px;
+            border: 1px solid rgba(255, 193, 7, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.5);
+            flex-wrap: wrap;
+        }
+
+        .vat-status .vat-paid {
+            color: #81c784;
+            background: rgba(76, 175, 80, 0.08);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(76, 175, 80, 0.08);
+        }
+
+        .vat-status .vat-pending {
+            color: #ffd54f;
+            background: rgba(255, 193, 7, 0.05);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 193, 7, 0.06);
+        }
+
+        .vat-status .vat-amount {
+            color: #c0f5ff;
+            font-weight: 600;
+        }
+
+        .btn-vat-pay {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background: linear-gradient(145deg, rgba(255, 193, 7, 0.12), rgba(255, 193, 7, 0.03));
+            border: 1px solid rgba(255, 193, 7, 0.12);
+            color: #ffd54f;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-vat-pay:hover {
+            background: rgba(255, 193, 7, 0.18);
+            border-color: rgba(255, 193, 7, 0.25);
+            color: white;
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.05);
+        }
+
+        .warning-badge {
+            background: rgba(74, 240, 255, 0.05);
+            padding: 8px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: rgba(74, 240, 255, 0.7);
+            border: 1px solid rgba(74, 240, 255, 0.06);
+        }
+
+        .tax-status-simple {
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tax-status-simple.paid {
+            background: rgba(76, 175, 80, 0.08);
+            color: #81c784;
+            border: 1px solid rgba(76, 175, 80, 0.08);
+        }
+
+        .tax-status-simple.pending {
+            background: rgba(255, 193, 7, 0.05);
+            color: #ffd54f;
+            border: 1px solid rgba(255, 193, 7, 0.06);
+        }
+
+        .relay-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-relay {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .btn-relay:active {
+            transform: scale(0.95);
+        }
+
+        .btn-relay:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-on {
+            background: rgba(76, 175, 80, 0.2);
+            color: #81c784;
+            border: 1px solid rgba(76, 175, 80, 0.12);
+        }
+
+        .btn-on:hover:not(:disabled) {
+            background: rgba(76, 175, 80, 0.3);
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.08);
+        }
+
+        .btn-off {
+            background: rgba(239, 83, 80, 0.15);
+            color: #ef9a9a;
+            border: 1px solid rgba(239, 83, 80, 0.1);
+        }
+
+        .btn-off:hover:not(:disabled) {
+            background: rgba(239, 83, 80, 0.25);
+            box-shadow: 0 0 30px rgba(239, 83, 80, 0.08);
+        }
+
+        .relay-status {
+            margin-top: 15px;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .relay-status.on {
+            background: rgba(76, 175, 80, 0.08);
+            color: #81c784;
+            border: 1px solid rgba(76, 175, 80, 0.06);
+        }
+
+        .relay-status.off {
+            background: rgba(239, 83, 80, 0.05);
+            color: #ef9a9a;
+            border: 1px solid rgba(239, 83, 80, 0.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            margin: 5px 0 10px;
+        }
+
+        .action-btn {
+            width: 100%;
+            max-width: 380px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            letter-spacing: 0.02em;
+        }
+
+        .action-btn:active {
+            transform: scale(0.97);
+        }
+
+        .action-btn-buy {
+            background: linear-gradient(145deg, rgba(0, 230, 118, 0.15), rgba(0, 200, 100, 0.05));
+            border: 1px solid rgba(0, 230, 118, 0.15);
+            color: #69f0ae;
+        }
+        .action-btn-buy:hover {
+            background: rgba(0, 230, 118, 0.2);
+            border-color: rgba(0, 230, 118, 0.3);
+            box-shadow: 0 0 40px rgba(0, 230, 118, 0.05);
+            color: white;
+            transform: scale(1.01);
+        }
+
+        .action-btn-auto {
+            background: linear-gradient(145deg, rgba(33, 150, 243, 0.12), rgba(33, 150, 243, 0.03));
+            border: 1px solid rgba(33, 150, 243, 0.12);
+            color: #64b5f6;
+        }
+        .action-btn-auto:hover {
+            background: rgba(33, 150, 243, 0.18);
+            border-color: rgba(33, 150, 243, 0.25);
+            box-shadow: 0 0 40px rgba(33, 150, 243, 0.05);
+            color: white;
+            transform: scale(1.01);
+        }
+
+        .action-btn-money {
+            background: linear-gradient(145deg, rgba(255, 193, 7, 0.12), rgba(255, 193, 7, 0.03));
+            border: 1px solid rgba(255, 193, 7, 0.12);
+            color: #ffd54f;
+        }
+        .action-btn-money:hover {
+            background: rgba(255, 193, 7, 0.18);
+            border-color: rgba(255, 193, 7, 0.25);
+            box-shadow: 0 0 40px rgba(255, 193, 7, 0.05);
+            color: white;
+            transform: scale(1.01);
+        }
+
+        .panel-container {
+            display: none;
+            margin-top: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .panel-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-container .amount-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .panel-container .amount-btn {
+            padding: 12px 8px;
+            background: rgba(74, 240, 255, 0.04);
+            border: 1px solid rgba(74, 240, 255, 0.08);
+            border-radius: 10px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.5);
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            text-align: center;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .panel-container .amount-btn:hover {
+            background: rgba(74, 240, 255, 0.08);
+            border-color: rgba(74, 240, 255, 0.15);
+            color: white;
+        }
+
+        .panel-container .input-field {
+            width: 100%;
+            padding: 12px;
+            background: rgba(74, 240, 255, 0.03);
+            border: 1px solid rgba(74, 240, 255, 0.06);
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            color: rgba(255,255,255,0.8);
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .panel-container .input-field:focus {
+            border-color: rgba(74, 240, 255, 0.15);
+            background: rgba(74, 240, 255, 0.05);
+        }
+
+        .panel-container .input-field::placeholder {
+            color: rgba(255,255,255,0.15);
+        }
+
+        .panel-container .btn-pay {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .panel-container .info-note {
+            font-size: 11px;
+            margin-top: 8px;
+            text-align: center;
+            background: rgba(74, 240, 255, 0.03);
+            padding: 6px;
+            border-radius: 8px;
+        }
+
+        #buyPanel .btn-pay {
+            background: linear-gradient(145deg, rgba(0, 230, 118, 0.15), rgba(0, 200, 100, 0.05));
+            border: 1px solid rgba(0, 230, 118, 0.15);
+            color: #69f0ae;
+        }
+        #buyPanel .btn-pay:hover {
+            background: rgba(0, 230, 118, 0.2);
+            border-color: rgba(0, 230, 118, 0.3);
+            color: white;
+            box-shadow: 0 0 30px rgba(0, 230, 118, 0.05);
+        }
+        #buyPanel .amount-btn {
+            border-color: rgba(0, 230, 118, 0.06);
+        }
+        #buyPanel .amount-btn:hover {
+            background: rgba(0, 230, 118, 0.06);
+            border-color: rgba(0, 230, 118, 0.12);
+            color: #69f0ae;
+        }
+        #buyPanel .info-note {
+            color: rgba(0, 230, 118, 0.3);
+            background: rgba(0, 230, 118, 0.03);
+        }
+        #buyPanel .input-field:focus {
+            border-color: rgba(0, 230, 118, 0.15);
+        }
+
+        #autoPanel .btn-pay {
+            background: linear-gradient(145deg, rgba(33, 150, 243, 0.12), rgba(33, 150, 243, 0.03));
+            border: 1px solid rgba(33, 150, 243, 0.12);
+            color: #64b5f6;
+        }
+        #autoPanel .btn-pay:hover {
+            background: rgba(33, 150, 243, 0.18);
+            border-color: rgba(33, 150, 243, 0.25);
+            color: white;
+            box-shadow: 0 0 30px rgba(33, 150, 243, 0.05);
+        }
+        #autoPanel .settings-group input:focus {
+            border-color: rgba(33, 150, 243, 0.15);
+        }
+        #autoPanel .auto-toggle {
+            border-color: rgba(33, 150, 243, 0.05);
+            background: rgba(33, 150, 243, 0.02);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-radius: 10px;
+            color: rgba(255,255,255,0.5);
+        }
+        #autoPanel .switch input:checked + .slider {
+            background: rgba(33, 150, 243, 0.15);
+            border-color: rgba(33, 150, 243, 0.15);
+        }
+        #autoPanel .switch input:checked + .slider:before {
+            background-color: #64b5f6;
+            box-shadow: 0 0 30px rgba(33, 150, 243, 0.3);
+        }
+        #autoPanel .settings-group label {
+            color: rgba(33, 150, 243, 0.35);
+        }
+
+        #moneyPanel .btn-pay {
+            background: linear-gradient(145deg, rgba(255, 193, 7, 0.12), rgba(255, 193, 7, 0.03));
+            border: 1px solid rgba(255, 193, 7, 0.12);
+            color: #ffd54f;
+        }
+        #moneyPanel .btn-pay:hover {
+            background: rgba(255, 193, 7, 0.18);
+            border-color: rgba(255, 193, 7, 0.25);
+            color: white;
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.05);
+        }
+        #moneyPanel .input-field:focus {
+            border-color: rgba(255, 193, 7, 0.15);
+        }
+        #moneyPanel .provider-btn.selected {
+            background: rgba(255, 193, 7, 0.06);
+            border-color: rgba(255, 193, 7, 0.12);
+            color: #ffd54f;
+        }
+
+        .provider-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .provider-btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(74, 240, 255, 0.03);
+            border: 1px solid rgba(74, 240, 255, 0.06);
+            border-radius: 10px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.35);
+            transition: 0.3s;
+        }
+
+        .provider-btn:hover {
+            border-color: rgba(74, 240, 255, 0.1);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(74, 240, 255, 0.08);
+            transition: 0.3s;
+            border-radius: 24px;
+            border: 1px solid rgba(74, 240, 255, 0.06);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: rgba(255,255,255,0.15);
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .settings-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .settings-group {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .settings-group label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .settings-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(74, 240, 255, 0.03);
+            border: 1px solid rgba(74, 240, 255, 0.06);
+            border-radius: 10px;
+            font-size: 16px;
+            color: rgba(255,255,255,0.8);
+            outline: none;
+            transition: 0.3s;
+            box-sizing: border-box;
+            height: 48px;
+        }
+
+        .settings-group input:focus {
+            background: rgba(74, 240, 255, 0.05);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(6, 14, 26, 0.95);
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            z-index: 1000;
+            display: none;
+            border: 1px solid rgba(74, 240, 255, 0.08);
+            box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        }
+
+        .lock-message {
+            background: rgba(255, 193, 7, 0.04);
+            color: #ffd54f;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            border: 1px solid rgba(255, 193, 7, 0.06);
+        }
+
+        .power-restored {
+            background: rgba(76, 175, 80, 0.05);
+            color: #81c784;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            border: 1px solid rgba(76, 175, 80, 0.06);
+        }
+
+        .live-badge {
+            background: rgba(74, 240, 255, 0.06);
+            color: #6af5ff;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 10px;
+            animation: pulse 1.5s infinite;
+            border: 1px solid rgba(74, 240, 255, 0.06);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            z-index: 1000;
+            background: rgba(6, 14, 26, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(74, 240, 255, 0.06);
+            box-shadow: 0 2px 30px rgba(0,0,0,0.4);
+        }
+
+        .status-connected {
+            border-color: rgba(76, 175, 80, 0.15);
+            color: #81c784;
+        }
+
+        .status-disconnected {
+            border-color: rgba(239, 83, 80, 0.08);
+            color: #ef9a9a;
+        }
+
+        @media (max-width: 500px) {
+            .readings-grid {
+                grid-template-columns: 1fr;
+            }
+            .balance-amount {
+                font-size: 36px;
+            }
+            .settings-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .settings-group {
+                margin-bottom: 10px;
+            }
+            .settings-group input {
+                height: 48px;
+            }
+            .login-container {
+                padding: 10px;
+            }
+            .login-container .glass-wrap {
+                padding: 2rem 1.2rem;
+                border-radius: 24px;
+            }
+            .logo h1 {
+                font-size: 2.2rem;
+                letter-spacing: 0.08em;
+            }
+            .logo .logo-icon {
+                font-size: 3rem;
+            }
+            .amount-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .action-btn {
+                max-width: 100%;
+                font-size: 14px;
+                padding: 12px 16px;
+            }
+            .vat-status {
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lightning-arc"><i class="fas fa-bolt"></i></div>
+    <div class="lightning-arc-left"><i class="fas fa-bolt"></i></div>
+
+    <div id="connStatus" class="connection-status status-disconnected">🔴 Connecting...</div>
+
+    <!-- ===== LOGIN SCREEN ===== -->
+    <div id="loginScreen" class="login-container">
+        <div class="glass-wrap">
+            <div class="logo">
+                <span class="logo-icon"><i class="fas fa-bolt"></i></span>
+                <h1>Smart Meter</h1>
+                <div class="sub">⚡ 240V/50Hz Tanzania ⚡</div>
+                <div class="voltage-line"></div>
+            </div>
+            <div class="login-card">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="emailInput" placeholder="Email" value="admin@smartmeter.com">
+                    <div class="input-pulse"></div>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="passwordInput" placeholder="Password" value="password123">
+                    <div class="input-pulse"></div>
+                </div>
+                <button class="btn-login" onclick="loginWithFirebase()">
+                    <span>sign in</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <div class="login-footnote">
+                    <span class="pulse-dot"></span>
+                    <span>secure connection</span>
+                    <span class="dot"></span>
+                    <span>smart energy</span>
+                    <span class="pulse-dot"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== DASHBOARD ===== -->
+    <div id="dashboard" class="dashboard">
+        <div class="header">
+            <div class="header-content">
+                <div class="meter-info">
+                    <i class="fas fa-microchip"></i>
+                    <span class="meter-id" id="displayMeterId">MTR001</span>
+                    <span class="live-badge">240V/50Hz</span>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            <!-- Live Readings -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Live Meter Readings</span>
+                    <span style="margin-left: auto; font-size: 10px; background: rgba(74, 240, 255, 0.06); color: #6af5ff; padding: 2px 8px; border-radius: 20px;">REAL-TIME</span>
+                </div>
+                <div class="readings-grid">
+                    <div class="reading-box">
+                        <div class="reading-label"><i class="fas fa-bolt"></i> Voltage</div>
+                        <div class="reading-value" id="voltage">--</div>
+                        <div class="reading-unit">Volts</div>
+                    </div>
+                    <div class="reading-box">
+                        <div class="reading-label"><i class="fas fa-charging-station"></i> Current</div>
+                        <div class="reading-value" id="current">--</div>
+                        <div class="reading-unit">Amps</div>
+                    </div>
+                    <div class="reading-box">
+                        <div class="reading-label"><i class="fas fa-bolt"></i> Power</div>
+                        <div class="reading-value" id="power">--</div>
+                        <div class="reading-unit">Watts</div>
+                    </div>
+                    <div class="reading-box">
+                        <div class="reading-label"><i class="fas fa-battery-full"></i> Units</div>
+                        <div class="reading-value" id="liveUnits">--</div>
+                        <div class="reading-unit">kWh</div>
+                    </div>
+                </div>
+                <div class="info-note" style="margin-top: 10px; color: rgba(74, 240, 255, 0.25);">
+                    <i class="fas fa-sync-alt"></i> Firebase real-time sync
+                </div>
+            </div>
+
+            <!-- Balance Card -->
+            <div class="card balance-card" id="balanceCard">
+                <div class="balance-amount" id="balance">--</div>
+                <div class="balance-label-small">Meter Balance (TZS)</div>
+                
+                <div class="vat-status" id="vatStatusDisplay">
+                    <i class="fas fa-receipt"></i>
+                    <span>VAT (18%):</span>
+                    <span class="vat-amount" id="vatAmount">-- TZS</span>
+                    <span class="vat-paid" id="vatStatusBadge">● PAID</span>
+                </div>
+                
+                <button class="btn-vat-pay" onclick="payVAT()">
+                    <i class="fas fa-receipt"></i> Pay VAT (18%)
+                </button>
+                
+                <div class="warning-badge" id="warningMsg" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i> <span id="warningText"></span>
+                </div>
+                <div id="taxStatusSimple" class="tax-status-simple pending">
+                    <i class="fas fa-file-invoice-dollar"></i> Status: <span id="taxStatusText">Checking...</span>
+                </div>
+            </div>
+
+            <!-- Load Control -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-plug"></i><span>Load Control</span></div>
+                <div class="relay-buttons">
+                    <button class="btn-relay btn-on" id="relayOnBtn" onclick="controlRelay(1)"><i class="fas fa-power-off"></i> Turn ON</button>
+                    <button class="btn-relay btn-off" id="relayOffBtn" onclick="controlRelay(0)"><i class="fas fa-power-off"></i> Turn OFF</button>
+                </div>
+                <div class="relay-status on" id="relayStatusDiv">Status: <strong id="relayStatus">--</strong></div>
+                <div id="zeroFundsLockMsg" class="lock-message" style="display: none;">
+                    <i class="fas fa-lock"></i> NO FUNDS!
+                </div>
+                <div id="noUnitsMsg" class="lock-message" style="display: none; background: rgba(255, 193, 7, 0.04); color: #ffd54f;">
+                    <i class="fas fa-exclamation-triangle"></i> NO UNITS!
+                </div>
+                <div id="taxLockMsg" class="lock-message" style="display: none; background: rgba(255, 193, 7, 0.04); color: #ffd54f;">
+                    <i class="fas fa-file-invoice-dollar"></i> TAX PENDING!
+                </div>
+                <div id="powerRestoredMsg" class="power-restored" style="display: none;"><i class="fas fa-check-circle"></i> POWER RESTORED!</div>
+            </div>
+
+            <!-- Manage Funds -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-credit-card"></i><span>Manage Funds & Units</span></div>
+
+                <div class="action-buttons">
+                    <button class="action-btn action-btn-buy" onclick="togglePanel('buyPanel')">
+                        <i class="fas fa-exchange-alt"></i> Buy Units
+                    </button>
+                    <button class="action-btn action-btn-auto" onclick="togglePanel('autoPanel')">
+                        <i class="fas fa-robot"></i> Auto Buy Units
+                    </button>
+                    <button class="action-btn action-btn-money" onclick="togglePanel('moneyPanel')">
+                        <i class="fas fa-plus-circle"></i> Add Money
+                    </button>
+                </div>
+
+                <div id="buyPanel" class="panel-container">
+                    <div class="amount-buttons">
+                        <button class="amount-btn" onclick="setManualAmount(5000)">5,000 TZS</button>
+                        <button class="amount-btn" onclick="setManualAmount(10000)">10,000 TZS</button>
+                        <button class="amount-btn" onclick="setManualAmount(20000)">20,000 TZS</button>
+                        <button class="amount-btn" onclick="setManualAmount(50000)">50,000 TZS</button>
+                    </div>
+                    <input type="number" id="manualAmount" class="input-field" placeholder="Enter amount (TZS)">
+                    <button class="btn-pay" onclick="buyUnitsFromBalance()"><i class="fas fa-exchange-alt"></i> Buy Units</button>
+                    <div class="info-note">
+                        <i class="fas fa-info-circle"></i> Rate: 350 TZS = 1 kWh
+                    </div>
+                </div>
+
+                <div id="autoPanel" class="panel-container">
+                    <div class="auto-toggle">
+                        <span><i class="fas fa-robot"></i> <strong>Automatic Purchase</strong><br><small style="font-size: 11px;">Buy when units are low</small></span>
+                        <label class="switch">
+                            <input type="checkbox" id="autoBuyToggle" onchange="toggleAutoBuyUnits()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-group">
+                            <label><i class="fas fa-tachometer-alt"></i> Threshold (kWh)</label>
+                            <input type="number" id="thresholdInput" class="input-field" step="0.5" min="0.5" max="10" value="3.0">
+                        </div>
+                        <div class="settings-group">
+                            <label><i class="fas fa-money-bill-wave"></i> Amount (TZS)</label>
+                            <input type="number" id="amountInput" class="input-field" step="1000" min="1000" value="10000">
+                        </div>
+                    </div>
+                    <button class="btn-pay" onclick="saveAutoBuySettings()"><i class="fas fa-save"></i> Save Settings</button>
+                    <div id="autoNotificationMsg" style="font-size: 12px; margin-top: 10px; text-align: center;"></div>
+                </div>
+
+                <div id="moneyPanel" class="panel-container">
+                    <div class="provider-buttons">
+                        <button class="provider-btn selected" onclick="selectProvider('mpesa')" id="mpesaBtn"><i class="fas fa-mobile-alt"></i> M-Pesa</button>
+                        <button class="provider-btn" onclick="selectProvider('tigo')" id="tigoBtn"><i class="fas fa-mobile-alt"></i> Tigo</button>
+                        <button class="provider-btn" onclick="selectProvider('airtel')" id="airtelBtn"><i class="fas fa-mobile-alt"></i> Airtel</button>
+                    </div>
+                    <input type="tel" id="phoneNumber" class="input-field" placeholder="Phone number">
+                    <input type="number" id="mobileAmount" class="input-field" placeholder="Amount (TZS)">
+                    <button class="btn-pay" onclick="addMoneyToBalance()"><i class="fas fa-plus-circle"></i> Add Money</button>
+                    <div id="paymentStatus" style="margin-top: 10px; font-size: 12px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ============================================
+        // 🔴 FIREBASE CONFIGURATION - REPLACE WITH YOURS 🔴
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // ============================================
+        // INITIALIZE FIREBASE
+        // ============================================
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // ============================================
+        // CONSTANTS - MATCH YOUR ARDUINO CODE
+        // ============================================
+        const RATE_PER_KWH = 350;
+        const MONTHLY_TAX = 2200;
+        const VAT_RATE = 0.18;
+        const MAINS_VOLTAGE = 240;
+
+        let currentBalanceTZS = 0;
+        let currentUnits = 0;
+        let currentRelayState = 0;
+        let selectedProvider = "mpesa";
+        let currentMeter = "MTR001";
+        let autoBuyEnabled = false;
+        let autoBuyTriggeredRecently = false;
+        let autoThreshold = 3.0;
+        let autoAmount = 10000;
+        let taxPending = false;
+        let vatPaid = false;
+        let vatAmount = 0;
+        let isLoggedIn = false;
+
+        // ============================================
+        // PARTICLES
+        // ============================================
+        (function createParticles() {
+            const container = document.body;
+            const count = 30;
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                el.className = 'particle';
+                const size = 2 + Math.random() * 4;
+                el.style.width = size + 'px';
+                el.style.height = size + 'px';
+                el.style.left = Math.random() * 100 + '%';
+                el.style.animationDuration = 12 + Math.random() * 20 + 's';
+                el.style.animationDelay = Math.random() * 20 + 's';
+                el.style.opacity = 0.2 + Math.random() * 0.4;
+                el.style.boxShadow = `0 0 ${size * 4}px rgba(106, 245, 255, ${0.2 + Math.random() * 0.3})`;
+                container.appendChild(el);
+            }
+        })();
+
+        // ============================================
+        // UI HELPERS
+        // ============================================
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = isError ? 'rgba(200, 50, 50, 0.85)' : 'rgba(6, 14, 26, 0.95)';
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 4000);
+        }
+
+        function togglePanel(panelId) {
+            document.querySelectorAll('.panel-container').forEach(p => p.classList.remove('active'));
+            const panel = document.getElementById(panelId);
+            if (panel) {
+                panel.classList.add('active');
+                if (panelId === 'autoPanel') {
+                    loadAutoBuySettings();
+                    const toggle = document.getElementById('autoBuyToggle');
+                    if (toggle) toggle.checked = autoBuyEnabled;
+                }
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connStatus');
+            if (connected) {
+                status.className = 'connection-status status-connected';
+                status.innerHTML = '✅ Firebase Online | 240V/50Hz';
+            } else {
+                status.className = 'connection-status status-disconnected';
+                status.innerHTML = '🔴 Connecting...';
+            }
+        }
+
+        // ============================================
+        // FIREBASE AUTH - LOGIN ONLY
+        // ============================================
+        function loginWithFirebase() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+
+            if (!email || !password) {
+                showToast("Please enter email and password", true);
+                return;
+            }
+
+            showToast("Signing in...", false);
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    isLoggedIn = true;
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    showToast(`✅ Welcome ${userCredential.user.email}`, false);
+                    startFirebaseSync();
+                })
+                .catch((error) => {
+                    let message = error.message;
+                    if (error.code === 'auth/user-not-found') {
+                        message = '❌ User not found. Please contact administrator.';
+                    } else if (error.code === 'auth/wrong-password') {
+                        message = '❌ Incorrect password.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        message = '❌ Invalid email address.';
+                    }
+                    showToast(message, true);
+                    console.error("Login error:", error);
+                });
+        }
+
+        function logout() {
+            auth.signOut().then(() => {
+                isLoggedIn = false;
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'block';
+                updateConnectionStatus(false);
+                showToast("Logged out successfully");
+            }).catch((error) => {
+                showToast(`❌ ${error.message}`, true);
+            });
+        }
+
+        // ============================================
+        // FIREBASE REALTIME SYNC
+        // ============================================
+        function startFirebaseSync() {
+            const meterRef = db.ref(`meters/${currentMeter}`);
+
+            meterRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    currentBalanceTZS = data.balance || 0;
+                    currentUnits = data.units || 0;
+                    currentRelayState = data.relay || 0;
+
+                    document.getElementById('balance').innerHTML = currentBalanceTZS.toLocaleString();
+                    document.getElementById('liveUnits').innerHTML = currentUnits.toFixed(2);
+                    document.getElementById('voltage').innerHTML = (data.voltage || MAINS_VOLTAGE).toFixed(1);
+                    document.getElementById('current').innerHTML = (data.current || 0).toFixed(2);
+                    document.getElementById('power').innerHTML = (data.power || 0).toFixed(1);
+
+                    const relaySpan = document.getElementById('relayStatus');
+                    const relayDiv = document.getElementById('relayStatusDiv');
+                    if (currentRelayState === 1) {
+                        relaySpan.innerHTML = 'ON';
+                        relayDiv.className = 'relay-status on';
+                    } else {
+                        relaySpan.innerHTML = 'OFF';
+                        relayDiv.className = 'relay-status off';
+                    }
+
+                    checkAndApplyMonthlyTax();
+                    calculateAndDisplayVAT();
+                    updateUI();
+
+                    updateConnectionStatus(true);
+                }
+            }, (error) => {
+                console.error("Firebase sync error:", error);
+                updateConnectionStatus(false);
+                showToast("⚠️ Firebase connection issue", true);
+            });
+
+            const settingsRef = db.ref(`settings/${currentMeter}`);
+            settingsRef.on('value', (snapshot) => {
+                const settings = snapshot.val();
+                if (settings) {
+                    autoBuyEnabled = settings.autoBuyEnabled || false;
+                    autoThreshold = settings.autoThreshold || 3.0;
+                    autoAmount = settings.autoAmount || 10000;
+                    
+                    const toggle = document.getElementById('autoBuyToggle');
+                    if (toggle) toggle.checked = autoBuyEnabled;
+                    
+                    document.getElementById('thresholdInput').value = autoThreshold;
+                    document.getElementById('amountInput').value = autoAmount;
+                }
+            });
+        }
+
+        // ============================================
+        // FIREBASE WRITE OPERATIONS
+        // ============================================
+        async function updateMeterData(data) {
+            try {
+                await db.ref(`meters/${currentMeter}`).update(data);
+                return true;
+            } catch (error) {
+                console.error("Update error:", error);
+                showToast("❌ Failed to update meter data", true);
+                return false;
+            }
+        }
+
+        async function updateSettings(settings) {
+            try {
+                await db.ref(`settings/${currentMeter}`).update(settings);
+                return true;
+            } catch (error) {
+                console.error("Settings update error:", error);
+                showToast("❌ Failed to save settings", true);
+                return false;
+            }
+        }
+
+        // ============================================
+        // VAT FUNCTIONS
+        // ============================================
+        function calculateAndDisplayVAT() {
+            vatAmount = currentBalanceTZS * VAT_RATE;
+            
+            const vatDisplay = document.getElementById('vatAmount');
+            const vatBadge = document.getElementById('vatStatusBadge');
+            
+            vatDisplay.textContent = vatAmount.toLocaleString() + ' TZS';
+            
+            const now = new Date();
+            const key = `${currentMeter}_vat_paid_month`;
+            const stored = localStorage.getItem(key);
+            const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
+            
+            if (stored === monthKey) {
+                vatPaid = true;
+                vatBadge.className = 'vat-paid';
+                vatBadge.textContent = '● PAID';
+            } else {
+                vatPaid = false;
+                vatBadge.className = 'vat-pending';
+                vatBadge.textContent = '● PENDING';
+            }
+        }
+
+        async function payVAT() {
+            if (vatPaid) {
+                showToast('VAT already paid for this month', false);
+                return;
+            }
+            
+            if (currentBalanceTZS < vatAmount) {
+                showToast(`❌ Insufficient balance! VAT of ${vatAmount.toLocaleString()} TZS required.`, true);
+                return;
+            }
+            
+            const newBalance = currentBalanceTZS - vatAmount;
+            currentBalanceTZS = newBalance;
+            
+            await updateMeterData({ balance: newBalance });
+            
+            const now = new Date();
+            const key = `${currentMeter}_vat_paid_month`;
+            localStorage.setItem(key, `${now.getFullYear()}-${now.getMonth()}`);
+            
+            vatPaid = true;
+            showToast(`✅ VAT of ${vatAmount.toLocaleString()} TZS paid successfully!`, false);
+            
+            calculateAndDisplayVAT();
+            updateUI();
+        }
+
+        async function checkAndApplyMonthlyTax() {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            const key = `${currentMeter}_tax_paid_month`;
+            const stored = localStorage.getItem(key);
+            
+            if (stored === `${currentYear}-${currentMonth}`) {
+                taxPending = false;
+                updateTaxStatusDisplay();
+                return;
+            }
+            
+            if (currentBalanceTZS >= MONTHLY_TAX) {
+                const newBalance = currentBalanceTZS - MONTHLY_TAX;
+                currentBalanceTZS = newBalance;
+                await updateMeterData({ balance: newBalance });
+                localStorage.setItem(key, `${currentYear}-${currentMonth}`);
+                taxPending = false;
+                showToast(`💰 Monthly tax ${MONTHLY_TAX.toLocaleString()} TZS deducted`, false);
+                updateTaxStatusDisplay();
+            } else {
+                taxPending = true;
+                updateTaxStatusDisplay();
+            }
+        }
+
+        function updateTaxStatusDisplay() {
+            const taxDiv = document.getElementById('taxStatusSimple');
+            const taxTextSpan = document.getElementById('taxStatusText');
+            if (taxPending) {
+                taxTextSpan.innerHTML = 'PENDING';
+                taxDiv.className = 'tax-status-simple pending';
+            } else {
+                taxTextSpan.innerHTML = 'PAID';
+                taxDiv.className = 'tax-status-simple paid';
+            }
+        }
+
+        // ============================================
+        // CORE FUNCTIONS
+        // ============================================
+        async function buyUnitsFromBalance() {
+            let amountToSpend = parseInt(document.getElementById('manualAmount').value);
+            if (!amountToSpend || amountToSpend <= 0) {
+                showToast("Please enter a valid amount", true);
+                return;
+            }
+            if (amountToSpend > currentBalanceTZS) {
+                showToast(`Insufficient balance! You have ${currentBalanceTZS.toLocaleString()} TZS.`, true);
+                return;
+            }
+            
+            const unitsToAdd = amountToSpend / RATE_PER_KWH;
+            const oldUnits = currentUnits;
+            const newBalance = currentBalanceTZS - amountToSpend;
+            const newUnits = currentUnits + unitsToAdd;
+            
+            await updateMeterData({
+                balance: newBalance,
+                units: newUnits
+            });
+            
+            currentBalanceTZS = newBalance;
+            currentUnits = newUnits;
+            
+            showToast(`✅ Purchased ${amountToSpend.toLocaleString()} TZS = +${unitsToAdd.toFixed(2)} kWh`, false);
+            document.getElementById('manualAmount').value = '';
+            
+            updateUI();
+            
+            if (oldUnits <= 0 && newUnits > 0 && !taxPending) {
+                await updateMeterData({ relay: 1 });
+                showPowerRestoredMessage();
+            }
+        }
+
+        async function addMoneyToBalance() {
+            const phone = document.getElementById('phoneNumber').value;
+            const amount = parseInt(document.getElementById('mobileAmount').value);
+            
+            if (!phone || phone.length < 8) {
+                showToast("Please enter a valid phone number", true);
+                return;
+            }
+            if (!amount || amount <= 0) {
+                showToast("Please enter a valid amount", true);
+                return;
+            }
+            
+            document.getElementById('paymentStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            setTimeout(async () => {
+                const newBalance = currentBalanceTZS + amount;
+                currentBalanceTZS = newBalance;
+                
+                await updateMeterData({ balance: newBalance });
+                showToast(`✅ Added ${amount.toLocaleString()} TZS to meter balance.`);
+                document.getElementById('phoneNumber').value = '';
+                document.getElementById('mobileAmount').value = '';
+                document.getElementById('paymentStatus').innerHTML = '<span style="color: #ffd54f;">✅ Money added!</span>';
+                
+                updateUI();
+                setTimeout(() => { document.getElementById('paymentStatus').innerHTML = ''; }, 2000);
+            }, 1500);
+        }
+
+        async function controlRelay(state) {
+            if (state === 1) {
+                if (taxPending) { showToast(`❌ Cannot turn ON! Tax pending.`, true); return; }
+                if (currentUnits <= 0.05) { showToast(`❌ Cannot turn ON! No units available.`, true); return; }
+            }
+            await updateMeterData({ relay: state });
+            showToast(`✅ Relay turned ${state === 1 ? 'ON' : 'OFF'}`, false);
+        }
+
+        function updateUI() {
+            document.getElementById('balance').innerHTML = currentBalanceTZS.toLocaleString();
+            document.getElementById('liveUnits').innerHTML = currentUnits.toFixed(2);
+            
+            const onBtn = document.getElementById('relayOnBtn');
+            const offBtn = document.getElementById('relayOffBtn');
+            const noUnitsMsg = document.getElementById('noUnitsMsg');
+            const zeroFundsMsg = document.getElementById('zeroFundsLockMsg');
+            const taxLockMsg = document.getElementById('taxLockMsg');
+            const warningDiv = document.getElementById('warningMsg');
+            const warningText = document.getElementById('warningText');
+            
+            const hasNoUnits = (currentUnits <= 0.02);
+            
+            if (taxPending) {
+                onBtn.disabled = true;
+                offBtn.disabled = false;
+                taxLockMsg.style.display = 'block';
+                noUnitsMsg.style.display = 'none';
+                zeroFundsMsg.style.display = 'none';
+                warningDiv.style.display = 'block';
+                warningText.innerHTML = `🔴 TAX PENDING! Monthly tax of ${MONTHLY_TAX.toLocaleString()} TZS is due.`;
+            } 
+            else if (hasNoUnits && currentBalanceTZS > 0) {
+                onBtn.disabled = false;
+                offBtn.disabled = false;
+                noUnitsMsg.style.display = 'block';
+                taxLockMsg.style.display = 'none';
+                zeroFundsMsg.style.display = 'none';
+                warningDiv.style.display = 'block';
+                warningText.innerHTML = `🟡 Balance: ${currentBalanceTZS.toLocaleString()} TZS but NO UNITS!`;
+            } 
+            else if (currentBalanceTZS <= 0 && hasNoUnits) {
+                onBtn.disabled = true;
+                offBtn.disabled = true;
+                zeroFundsMsg.style.display = 'block';
+                noUnitsMsg.style.display = 'none';
+                taxLockMsg.style.display = 'none';
+                warningDiv.style.display = 'block';
+                warningText.innerHTML = '🔴 EMERGENCY: Add money, then buy units.';
+            } 
+            else if (currentUnits <= 2.0 && currentUnits > 0) {
+                onBtn.disabled = false;
+                offBtn.disabled = false;
+                noUnitsMsg.style.display = 'none';
+                zeroFundsMsg.style.display = 'none';
+                taxLockMsg.style.display = 'none';
+                warningDiv.style.display = 'block';
+                warningText.innerHTML = `⚠️ LOW UNITS! Only ${currentUnits.toFixed(2)} kWh remaining.`;
+            } 
+            else {
+                onBtn.disabled = false;
+                offBtn.disabled = false;
+                noUnitsMsg.style.display = 'none';
+                zeroFundsMsg.style.display = 'none';
+                taxLockMsg.style.display = 'none';
+                warningDiv.style.display = 'none';
+            }
+        }
+
+        function setManualAmount(amount) { document.getElementById('manualAmount').value = amount; }
+        
+        function selectProvider(provider) {
+            selectedProvider = provider;
+            document.querySelectorAll('.provider-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById(`${provider}Btn`).classList.add('selected');
+        }
+
+        function showPowerRestoredMessage() {
+            const msgDiv = document.getElementById('powerRestoredMsg');
+            msgDiv.style.display = 'block';
+            setTimeout(() => { msgDiv.style.display = 'none'; }, 5000);
+        }
+
+        // ============================================
+        // AUTO BUY FUNCTIONS
+        // ============================================
+        async function saveAutoBuySettings() {
+            autoThreshold = parseFloat(document.getElementById('thresholdInput').value);
+            autoAmount = parseFloat(document.getElementById('amountInput').value);
+            
+            await updateSettings({
+                autoThreshold: autoThreshold,
+                autoAmount: autoAmount
+            });
+            
+            showToast(`Auto buy settings saved! Threshold: ${autoThreshold} kWh, Amount: ${autoAmount.toLocaleString()} TZS`);
+        }
+
+        function loadAutoBuySettings() {
+            document.getElementById('thresholdInput').value = autoThreshold;
+            document.getElementById('amountInput').value = autoAmount;
+            
+            const toggle = document.getElementById('autoBuyToggle');
+            if (toggle) toggle.checked = autoBuyEnabled;
+        }
+
+        async function checkAndPerformAutoBuy() {
+            if (!autoBuyEnabled) return false;
+            if (autoBuyTriggeredRecently) return false;
+            if (taxPending) return false;
+            
+            if (currentUnits <= autoThreshold && currentUnits > 0) {
+                if (currentBalanceTZS >= autoAmount) {
+                    autoBuyTriggeredRecently = true;
+                    const unitsToAdd = autoAmount / RATE_PER_KWH;
+                    const newBalance = currentBalanceTZS - autoAmount;
+                    const newUnits = currentUnits + unitsToAdd;
+                    
+                    await updateMeterData({
+                        balance: newBalance,
+                        units: newUnits
+                    });
+                    
+                    currentBalanceTZS = newBalance;
+                    currentUnits = newUnits;
+                    
+                    const autoMsg = document.getElementById('autoNotificationMsg');
+                    autoMsg.innerHTML = `<i class="fas fa-robot" style="color: #64b5f6;"></i> <strong>AUTO BUY!</strong> Purchased ${autoAmount.toLocaleString()} TZS = ${unitsToAdd.toFixed(2)} kWh`;
+                    autoMsg.style.background = 'rgba(33, 150, 243, 0.05)';
+                    showToast(`🤖 AUTO BUY! +${unitsToAdd.toFixed(2)} kWh`, false);
+                    setTimeout(() => { autoMsg.innerHTML = ''; }, 8000);
+                    
+                    updateUI();
+                    setTimeout(() => { autoBuyTriggeredRecently = false; }, 10000);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        async function toggleAutoBuyUnits() {
+            const toggle = document.getElementById('autoBuyToggle');
+            autoBuyEnabled = toggle.checked;
+            autoBuyTriggeredRecently = false;
+            
+            await updateSettings({ autoBuyEnabled: autoBuyEnabled });
+            
+            const autoMsg = document.getElementById('autoNotificationMsg');
+            if (autoBuyEnabled) {
+                autoMsg.innerHTML = `<i class="fas fa-check-circle" style="color: #64b5f6;"></i> <strong>AUTO BUY ENABLED!</strong> Will buy ${autoAmount.toLocaleString()} TZS when units ≤ ${autoThreshold} kWh.`;
+                autoMsg.style.background = 'rgba(33, 150, 243, 0.05)';
+                setTimeout(() => checkAndPerformAutoBuy(), 800);
+            } else {
+                autoMsg.innerHTML = `<i class="fas fa-ban"></i> AUTO BUY DISABLED.`;
+                autoMsg.style.background = 'rgba(255,255,255,0.02)';
+            }
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                isLoggedIn = true;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                showToast(`✅ Welcome back ${user.email}`, false);
+                startFirebaseSync();
+            } else {
+                isLoggedIn = false;
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'block';
+            }
+        });
+
+        setInterval(async () => {
+            if (isLoggedIn && autoBuyEnabled) {
+                await checkAndPerformAutoBuy();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
