@@ -3,18 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Meter - Customer Portal</title>
-    
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <title>Smart Meter · Customer Portal</title>
     <style>
-        /* ===== ELECTRICAL THEME - SAME AS YOUR DESIGN ===== */
         * {
             margin: 0;
             padding: 0;
@@ -25,6 +15,9 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             background: radial-gradient(ellipse at 30% 40%, #0f1a2b, #05080f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
             overflow-x: hidden;
         }
@@ -97,13 +90,13 @@
             50% { opacity: 1; text-shadow: 0 0 60px rgba(74, 240, 255, 0.3); }
         }
 
-        /* ===== LOGIN SCREEN ===== */
         .login-container {
-            max-width: 400px;
-            margin: 0 auto;
+            width: 100%;
+            max-width: 420px;
             padding: 20px;
             position: relative;
-            z-index: 1;
+            z-index: 2;
+            margin: 0 16px;
         }
 
         .login-container .glass-wrap {
@@ -133,6 +126,14 @@
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             pointer-events: none;
+        }
+
+        .login-container .glass-wrap:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 0 80px rgba(74, 240, 255, 0.12),
+                0 0 160px rgba(74, 240, 255, 0.05),
+                inset 0 0 100px rgba(74, 240, 255, 0.05);
         }
 
         .logo {
@@ -207,6 +208,10 @@
             background: transparent;
             border-radius: 20px;
             padding: 10px 0 0;
+        }
+
+        .login-card h2 {
+            display: none;
         }
 
         .input-group {
@@ -384,12 +389,12 @@
             50% { opacity: 0.8; transform: scale(1.5); }
         }
 
-        /* ===== DASHBOARD ===== */
         .dashboard {
             display: none;
             padding-bottom: 80px;
             position: relative;
             z-index: 1;
+            width: 100%;
         }
 
         .header {
@@ -551,64 +556,6 @@
             color: rgba(255,255,255,0.5);
         }
 
-        .vat-status {
-            background: rgba(255, 193, 7, 0.03);
-            border-radius: 10px;
-            padding: 10px 12px;
-            margin-top: 12px;
-            border: 1px solid rgba(255, 193, 7, 0.06);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 13px;
-            font-weight: 500;
-            color: rgba(255,255,255,0.5);
-            flex-wrap: wrap;
-        }
-
-        .vat-status .vat-paid {
-            color: #81c784;
-            background: rgba(76, 175, 80, 0.08);
-            padding: 4px 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(76, 175, 80, 0.08);
-        }
-
-        .vat-status .vat-pending {
-            color: #ffd54f;
-            background: rgba(255, 193, 7, 0.05);
-            padding: 4px 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 193, 7, 0.06);
-        }
-
-        .vat-status .vat-amount {
-            color: #c0f5ff;
-            font-weight: 600;
-        }
-
-        .btn-vat-pay {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            background: linear-gradient(145deg, rgba(255, 193, 7, 0.12), rgba(255, 193, 7, 0.03));
-            border: 1px solid rgba(255, 193, 7, 0.12);
-            color: #ffd54f;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-vat-pay:hover {
-            background: rgba(255, 193, 7, 0.18);
-            border-color: rgba(255, 193, 7, 0.25);
-            color: white;
-            box-shadow: 0 0 30px rgba(255, 193, 7, 0.05);
-        }
-
         .warning-badge {
             background: rgba(74, 240, 255, 0.05);
             padding: 8px;
@@ -619,30 +566,37 @@
             border: 1px solid rgba(74, 240, 255, 0.06);
         }
 
-        .tax-status-simple {
-            background: rgba(255,255,255,0.02);
-            border-radius: 10px;
-            padding: 8px 12px;
+        .vat-status-badge {
+            display: inline-block;
             margin-top: 12px;
-            font-size: 13px;
-            font-weight: 500;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            background: rgba(255, 193, 7, 0.06);
+            color: #ffd54f;
+            border: 1px solid rgba(255, 193, 7, 0.08);
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.02);
+            transition: 0.3s;
         }
 
-        .tax-status-simple.paid {
+        .vat-status-badge.paid {
             background: rgba(76, 175, 80, 0.08);
             color: #81c784;
-            border: 1px solid rgba(76, 175, 80, 0.08);
+            border-color: rgba(76, 175, 80, 0.1);
         }
 
-        .tax-status-simple.pending {
-            background: rgba(255, 193, 7, 0.05);
+        .vat-status-badge.pending {
+            background: rgba(255, 193, 7, 0.06);
             color: #ffd54f;
-            border: 1px solid rgba(255, 193, 7, 0.06);
+            border-color: rgba(255, 193, 7, 0.08);
+            animation: vatPulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes vatPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; box-shadow: 0 0 30px rgba(255, 193, 7, 0.08); }
         }
 
         .relay-buttons {
@@ -974,8 +928,9 @@
         .switch {
             position: relative;
             display: inline-block;
-            width: 50px;
-            height: 24px;
+            width: 52px;
+            height: 28px;
+            flex-shrink: 0;
         }
 
         .switch input {
@@ -993,20 +948,32 @@
             bottom: 0;
             background: rgba(74, 240, 255, 0.08);
             transition: 0.3s;
-            border-radius: 24px;
+            border-radius: 28px;
             border: 1px solid rgba(74, 240, 255, 0.06);
         }
 
         .slider:before {
             position: absolute;
             content: "";
-            height: 18px;
-            width: 18px;
+            height: 20px;
+            width: 20px;
             left: 3px;
             bottom: 3px;
-            background-color: rgba(255,255,255,0.15);
-            transition: 0.3s;
+            background-color: rgba(255,255,255,0.2);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
             border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .switch input:checked + .slider {
+            background: rgba(33, 150, 243, 0.15);
+            border-color: rgba(33, 150, 243, 0.15);
+        }
+
+        .switch input:checked + .slider:before {
+            transform: translateX(24px);
+            background-color: #64b5f6;
+            box-shadow: 0 0 30px rgba(33, 150, 243, 0.4);
         }
 
         .settings-row {
@@ -1025,7 +992,6 @@
             font-size: 12px;
             margin-bottom: 5px;
             font-weight: bold;
-            color: rgba(255,255,255,0.5);
         }
 
         .settings-group input {
@@ -1060,6 +1026,8 @@
             display: none;
             border: 1px solid rgba(74, 240, 255, 0.08);
             box-shadow: 0 0 40px rgba(0,0,0,0.6);
+            max-width: 90%;
+            text-align: center;
         }
 
         .lock-message {
@@ -1126,6 +1094,18 @@
             color: #ef9a9a;
         }
 
+        .global-badge {
+            background: rgba(33, 150, 243, 0.08);
+            color: #64b5f6;
+            font-size: 9px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(33, 150, 243, 0.08);
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         @media (max-width: 500px) {
             .readings-grid {
                 grid-template-columns: 1fr;
@@ -1165,41 +1145,44 @@
                 font-size: 14px;
                 padding: 12px 16px;
             }
-            .vat-status {
-                font-size: 12px;
-                padding: 8px 10px;
+            .connection-status {
+                font-size: 9px;
+                padding: 3px 8px;
+                top: 5px;
+                right: 5px;
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
     <div class="lightning-arc"><i class="fas fa-bolt"></i></div>
     <div class="lightning-arc-left"><i class="fas fa-bolt"></i></div>
 
-    <div id="connStatus" class="connection-status status-disconnected">🔴 Connecting...</div>
+    <div id="connStatus" class="connection-status status-disconnected">🔴 Connecting to Meter...</div>
 
-    <!-- ===== LOGIN SCREEN ===== -->
+    <!-- LOGIN -->
     <div id="loginScreen" class="login-container">
         <div class="glass-wrap">
             <div class="logo">
                 <span class="logo-icon"><i class="fas fa-bolt"></i></span>
                 <h1>Smart Meter</h1>
-                <div class="sub">⚡ 240V/50Hz Tanzania ⚡</div>
+                <div class="sub">⚡ high voltage ⚡</div>
                 <div class="voltage-line"></div>
             </div>
             <div class="login-card">
                 <div class="input-group">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="emailInput" placeholder="Email" value="admin@smartmeter.com">
+                    <i class="fas fa-microchip"></i>
+                    <input type="text" id="meterId" placeholder="meter ID" value="MTR001">
                     <div class="input-pulse"></div>
                 </div>
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="passwordInput" placeholder="Password" value="password123">
+                    <input type="password" id="password" placeholder="password" value="1234">
                     <div class="input-pulse"></div>
                 </div>
-                <button class="btn-login" onclick="loginWithFirebase()">
+                <button class="btn-login" onclick="login()">
                     <span>sign in</span>
                     <i class="fas fa-arrow-right"></i>
                 </button>
@@ -1214,14 +1197,15 @@
         </div>
     </div>
 
-    <!-- ===== DASHBOARD ===== -->
+    <!-- DASHBOARD -->
     <div id="dashboard" class="dashboard">
         <div class="header">
             <div class="header-content">
                 <div class="meter-info">
                     <i class="fas fa-microchip"></i>
                     <span class="meter-id" id="displayMeterId">MTR001</span>
-                    <span class="live-badge">240V/50Hz</span>
+                    <span class="live-badge">LIVE DATA</span>
+                    <span class="global-badge"><i class="fas fa-globe"></i> Global</span>
                 </div>
                 <button class="btn-logout" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Logout
@@ -1230,7 +1214,6 @@
         </div>
 
         <div class="dashboard-container">
-            <!-- Live Readings -->
             <div class="card">
                 <div class="card-title">
                     <i class="fas fa-chart-line"></i>
@@ -1254,41 +1237,27 @@
                         <div class="reading-unit">Watts</div>
                     </div>
                     <div class="reading-box">
-                        <div class="reading-label"><i class="fas fa-battery-full"></i> Units</div>
+                        <div class="reading-label"><i class="fas fa-battery-full"></i> Units Remaining</div>
                         <div class="reading-value" id="liveUnits">--</div>
                         <div class="reading-unit">kWh</div>
                     </div>
                 </div>
                 <div class="info-note" style="margin-top: 10px; color: rgba(74, 240, 255, 0.25);">
-                    <i class="fas fa-sync-alt"></i> Firebase real-time sync
+                    <i class="fas fa-sync-alt"></i> Data updates every 3 seconds from meter
                 </div>
             </div>
 
-            <!-- Balance Card -->
             <div class="card balance-card" id="balanceCard">
                 <div class="balance-amount" id="balance">--</div>
                 <div class="balance-label-small">Meter Balance (TZS)</div>
-                
-                <div class="vat-status" id="vatStatusDisplay">
-                    <i class="fas fa-receipt"></i>
-                    <span>VAT (18%):</span>
-                    <span class="vat-amount" id="vatAmount">-- TZS</span>
-                    <span class="vat-paid" id="vatStatusBadge">● PAID</span>
+                <div id="vatStatusBadge" class="vat-status-badge pending">
+                    <i class="fas fa-percent"></i> VAT: <span id="vatStatusText">Checking...</span>
                 </div>
-                
-                <button class="btn-vat-pay" onclick="payVAT()">
-                    <i class="fas fa-receipt"></i> Pay VAT (18%)
-                </button>
-                
                 <div class="warning-badge" id="warningMsg" style="display: none;">
                     <i class="fas fa-exclamation-triangle"></i> <span id="warningText"></span>
                 </div>
-                <div id="taxStatusSimple" class="tax-status-simple pending">
-                    <i class="fas fa-file-invoice-dollar"></i> Status: <span id="taxStatusText">Checking...</span>
-                </div>
             </div>
 
-            <!-- Load Control -->
             <div class="card">
                 <div class="card-title"><i class="fas fa-plug"></i><span>Load Control</span></div>
                 <div class="relay-buttons">
@@ -1297,18 +1266,17 @@
                 </div>
                 <div class="relay-status on" id="relayStatusDiv">Status: <strong id="relayStatus">--</strong></div>
                 <div id="zeroFundsLockMsg" class="lock-message" style="display: none;">
-                    <i class="fas fa-lock"></i> NO FUNDS!
+                    <i class="fas fa-lock"></i> NO FUNDS! Balance: 0 TZS | Units: 0 kWh. Please add money.
                 </div>
                 <div id="noUnitsMsg" class="lock-message" style="display: none; background: rgba(255, 193, 7, 0.04); color: #ffd54f;">
-                    <i class="fas fa-exclamation-triangle"></i> NO UNITS!
+                    <i class="fas fa-exclamation-triangle"></i> NO UNITS! You have balance but no units. Please use "Buy Units" to purchase electricity.
                 </div>
                 <div id="taxLockMsg" class="lock-message" style="display: none; background: rgba(255, 193, 7, 0.04); color: #ffd54f;">
-                    <i class="fas fa-file-invoice-dollar"></i> TAX PENDING!
+                    <i class="fas fa-file-invoice-dollar"></i> VAT PENDING! Monthly VAT of 2,200 TZS is due.
                 </div>
                 <div id="powerRestoredMsg" class="power-restored" style="display: none;"><i class="fas fa-check-circle"></i> POWER RESTORED!</div>
             </div>
 
-            <!-- Manage Funds -->
             <div class="card">
                 <div class="card-title"><i class="fas fa-credit-card"></i><span>Manage Funds & Units</span></div>
 
@@ -1331,8 +1299,8 @@
                         <button class="amount-btn" onclick="setManualAmount(20000)">20,000 TZS</button>
                         <button class="amount-btn" onclick="setManualAmount(50000)">50,000 TZS</button>
                     </div>
-                    <input type="number" id="manualAmount" class="input-field" placeholder="Enter amount (TZS)">
-                    <button class="btn-pay" onclick="buyUnitsFromBalance()"><i class="fas fa-exchange-alt"></i> Buy Units</button>
+                    <input type="number" id="manualAmount" class="input-field" placeholder="Enter amount to spend from balance (TZS)">
+                    <button class="btn-pay" onclick="buyUnitsFromBalance()"><i class="fas fa-exchange-alt"></i> Buy Units Using Balance</button>
                     <div class="info-note">
                         <i class="fas fa-info-circle"></i> Rate: 350 TZS = 1 kWh
                     </div>
@@ -1352,7 +1320,7 @@
                             <input type="number" id="thresholdInput" class="input-field" step="0.5" min="0.5" max="10" value="3.0">
                         </div>
                         <div class="settings-group">
-                            <label><i class="fas fa-money-bill-wave"></i> Amount (TZS)</label>
+                            <label><i class="fas fa-money-bill-wave"></i> Purchase Amount (TZS)</label>
                             <input type="number" id="amountInput" class="input-field" step="1000" min="1000" value="10000">
                         </div>
                     </div>
@@ -1363,12 +1331,12 @@
                 <div id="moneyPanel" class="panel-container">
                     <div class="provider-buttons">
                         <button class="provider-btn selected" onclick="selectProvider('mpesa')" id="mpesaBtn"><i class="fas fa-mobile-alt"></i> M-Pesa</button>
-                        <button class="provider-btn" onclick="selectProvider('tigo')" id="tigoBtn"><i class="fas fa-mobile-alt"></i> Tigo</button>
+                        <button class="provider-btn" onclick="selectProvider('tigo')" id="tigoBtn"><i class="fas fa-mobile-alt"></i> Tigo Pesa</button>
                         <button class="provider-btn" onclick="selectProvider('airtel')" id="airtelBtn"><i class="fas fa-mobile-alt"></i> Airtel</button>
                     </div>
-                    <input type="tel" id="phoneNumber" class="input-field" placeholder="Phone number">
-                    <input type="number" id="mobileAmount" class="input-field" placeholder="Amount (TZS)">
-                    <button class="btn-pay" onclick="addMoneyToBalance()"><i class="fas fa-plus-circle"></i> Add Money</button>
+                    <input type="tel" id="phoneNumber" class="input-field" placeholder="Phone number (e.g., 0712345678)">
+                    <input type="number" id="mobileAmount" class="input-field" placeholder="Amount to add (TZS)">
+                    <button class="btn-pay" onclick="addMoneyToBalance()"><i class="fas fa-plus-circle"></i> Add Money to Balance</button>
                     <div id="paymentStatus" style="margin-top: 10px; font-size: 12px;"></div>
                 </div>
             </div>
@@ -1379,50 +1347,40 @@
 
     <script>
         // ============================================
-        // 🔴 FIREBASE CONFIGURATION - REPLACE WITH YOURS 🔴
+        // YOUR BLYNK CREDENTIALS (Matching Your Datastreams)
         // ============================================
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-            projectId: "YOUR_PROJECT",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+        const BLYNK_TOKEN = "S6xX_Ex4ZK1dN9nV6E84FwNtp7G2_6Nx";
+        const BLYNK_API = "https://blynk.cloud/external/api";
 
-        // ============================================
-        // INITIALIZE FIREBASE
-        // ============================================
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
+        // Virtual Pins - Matching Your CSV
+        const PIN_VOLTAGE = "V0";
+        const PIN_CURRENT = "V1";
+        const PIN_POWER = "V2";
+        const PIN_ENERGY = "V3";
+        const PIN_BALANCE = "V4";
+        const PIN_RELAY = "V5";
+        const PIN_TOPUP = "V6";
 
-        // ============================================
-        // CONSTANTS - MATCH YOUR ARDUINO CODE
-        // ============================================
         const RATE_PER_KWH = 350;
         const MONTHLY_TAX = 2200;
-        const VAT_RATE = 0.18;
-        const MAINS_VOLTAGE = 240;
 
         let currentBalanceTZS = 0;
         let currentUnits = 0;
         let currentRelayState = 0;
         let selectedProvider = "mpesa";
-        let currentMeter = "MTR001";
+        let currentMeter = null;
         let autoBuyEnabled = false;
         let autoBuyTriggeredRecently = false;
         let autoThreshold = 3.0;
         let autoAmount = 10000;
         let taxPending = false;
-        let vatPaid = false;
-        let vatAmount = 0;
-        let isLoggedIn = false;
 
-        // ============================================
-        // PARTICLES
-        // ============================================
+        const meters = { 
+            "MTR001": { password: "1234" },
+            "MTR002": { password: "5678" }
+        };
+
+        // ===== PARTICLES =====
         (function createParticles() {
             const container = document.body;
             const count = 30;
@@ -1441,17 +1399,7 @@
             }
         })();
 
-        // ============================================
-        // UI HELPERS
-        // ============================================
-        function showToast(message, isError = false) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.style.background = isError ? 'rgba(200, 50, 50, 0.85)' : 'rgba(6, 14, 26, 0.95)';
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 4000);
-        }
-
+        // ===== PANEL TOGGLE =====
         function togglePanel(panelId) {
             document.querySelectorAll('.panel-container').forEach(p => p.classList.remove('active'));
             const panel = document.getElementById(panelId);
@@ -1459,250 +1407,127 @@
                 panel.classList.add('active');
                 if (panelId === 'autoPanel') {
                     loadAutoBuySettings();
-                    const toggle = document.getElementById('autoBuyToggle');
-                    if (toggle) toggle.checked = autoBuyEnabled;
                 }
             }
         }
 
-        function updateConnectionStatus(connected) {
-            const status = document.getElementById('connStatus');
-            if (connected) {
-                status.className = 'connection-status status-connected';
-                status.innerHTML = '✅ Firebase Online | 240V/50Hz';
-            } else {
-                status.className = 'connection-status status-disconnected';
-                status.innerHTML = '🔴 Connecting...';
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = isError ? 'rgba(200, 50, 50, 0.85)' : 'rgba(6, 14, 26, 0.95)';
+            toast.style.display = 'block';
+            clearTimeout(window.toastTimeout);
+            window.toastTimeout = setTimeout(() => { toast.style.display = 'none'; }, 4000);
+        }
+
+        // ===== API CALLS =====
+        async function getMeterData(pin) {
+            try {
+                const response = await fetch(`${BLYNK_API}/get?token=${BLYNK_TOKEN}&${pin}`);
+                if (!response.ok) throw new Error('API error');
+                const text = await response.text();
+                if (!text || text === 'null' || text === '') return null;
+                return text;
+            } catch (error) {
+                console.error(`Error reading pin ${pin}:`, error);
+                return null;
             }
         }
 
-        // ============================================
-        // FIREBASE AUTH - LOGIN ONLY
-        // ============================================
-        function loginWithFirebase() {
-            const email = document.getElementById('emailInput').value;
-            const password = document.getElementById('passwordInput').value;
-
-            if (!email || !password) {
-                showToast("Please enter email and password", true);
-                return;
+        async function sendCommandToMeter(pin, value) {
+            try {
+                const response = await fetch(`${BLYNK_API}/update?token=${BLYNK_TOKEN}&${pin}=${value}`);
+                if (!response.ok) throw new Error('Update failed');
+                showToast(`✅ Command sent`);
+                setTimeout(fetchLiveData, 300);
+                return true;
+            } catch (error) {
+                console.error(`Error writing to pin ${pin}:`, error);
+                showToast("❌ Failed to send command to meter", true);
+                return false;
             }
+        }
 
-            showToast("Signing in...", false);
+        // ===== FETCH LIVE DATA =====
+        async function fetchLiveData() {
+            if (!currentMeter) return false;
 
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    isLoggedIn = true;
-                    document.getElementById('loginScreen').style.display = 'none';
-                    document.getElementById('dashboard').style.display = 'block';
-                    showToast(`✅ Welcome ${userCredential.user.email}`, false);
-                    startFirebaseSync();
-                })
-                .catch((error) => {
-                    let message = error.message;
-                    if (error.code === 'auth/user-not-found') {
-                        message = '❌ User not found. Please contact administrator.';
-                    } else if (error.code === 'auth/wrong-password') {
-                        message = '❌ Incorrect password.';
-                    } else if (error.code === 'auth/invalid-email') {
-                        message = '❌ Invalid email address.';
+            try {
+                const [voltage, current, power, energy, balance, relay] = await Promise.all([
+                    getMeterData(PIN_VOLTAGE),
+                    getMeterData(PIN_CURRENT),
+                    getMeterData(PIN_POWER),
+                    getMeterData(PIN_ENERGY),
+                    getMeterData(PIN_BALANCE),
+                    getMeterData(PIN_RELAY)
+                ]);
+
+                if (voltage !== null && voltage !== '') {
+                    document.getElementById('connStatus').className = 'connection-status status-connected';
+                    document.getElementById('connStatus').innerHTML = '✅ Meter Online';
+
+                    document.getElementById('voltage').innerHTML = parseFloat(voltage).toFixed(1) || '0';
+                    document.getElementById('current').innerHTML = parseFloat(current).toFixed(2) || '0';
+                    document.getElementById('power').innerHTML = parseFloat(power).toFixed(1) || '0';
+
+                    if (energy !== null && energy !== '' && energy !== 'null') {
+                        currentUnits = parseFloat(energy);
+                        document.getElementById('liveUnits').innerHTML = currentUnits.toFixed(2);
                     }
-                    showToast(message, true);
-                    console.error("Login error:", error);
-                });
-        }
 
-        function logout() {
-            auth.signOut().then(() => {
-                isLoggedIn = false;
-                document.getElementById('dashboard').style.display = 'none';
-                document.getElementById('loginScreen').style.display = 'block';
-                updateConnectionStatus(false);
-                showToast("Logged out successfully");
-            }).catch((error) => {
-                showToast(`❌ ${error.message}`, true);
-            });
-        }
+                    if (balance !== null && balance !== '' && balance !== 'null') {
+                        currentBalanceTZS = parseFloat(balance);
+                        document.getElementById('balance').innerHTML = currentBalanceTZS.toLocaleString();
+                    }
 
-        // ============================================
-        // FIREBASE REALTIME SYNC
-        // ============================================
-        function startFirebaseSync() {
-            const meterRef = db.ref(`meters/${currentMeter}`);
-
-            meterRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    currentBalanceTZS = data.balance || 0;
-                    currentUnits = data.units || 0;
-                    currentRelayState = data.relay || 0;
-
-                    document.getElementById('balance').innerHTML = currentBalanceTZS.toLocaleString();
-                    document.getElementById('liveUnits').innerHTML = currentUnits.toFixed(2);
-                    document.getElementById('voltage').innerHTML = (data.voltage || MAINS_VOLTAGE).toFixed(1);
-                    document.getElementById('current').innerHTML = (data.current || 0).toFixed(2);
-                    document.getElementById('power').innerHTML = (data.power || 0).toFixed(1);
-
+                    const relayState = parseInt(relay);
                     const relaySpan = document.getElementById('relayStatus');
                     const relayDiv = document.getElementById('relayStatusDiv');
-                    if (currentRelayState === 1) {
+
+                    if (relayState === 1) {
                         relaySpan.innerHTML = 'ON';
                         relayDiv.className = 'relay-status on';
+                        currentRelayState = 1;
                     } else {
                         relaySpan.innerHTML = 'OFF';
                         relayDiv.className = 'relay-status off';
+                        currentRelayState = 0;
                     }
 
-                    checkAndApplyMonthlyTax();
-                    calculateAndDisplayVAT();
+                    // Check VAT status (based on balance)
+                    checkVATStatus();
                     updateUI();
-
-                    updateConnectionStatus(true);
+                    return true;
+                } else {
+                    document.getElementById('connStatus').className = 'connection-status status-disconnected';
+                    document.getElementById('connStatus').innerHTML = '⚠️ Meter Offline';
+                    return false;
                 }
-            }, (error) => {
-                console.error("Firebase sync error:", error);
-                updateConnectionStatus(false);
-                showToast("⚠️ Firebase connection issue", true);
-            });
-
-            const settingsRef = db.ref(`settings/${currentMeter}`);
-            settingsRef.on('value', (snapshot) => {
-                const settings = snapshot.val();
-                if (settings) {
-                    autoBuyEnabled = settings.autoBuyEnabled || false;
-                    autoThreshold = settings.autoThreshold || 3.0;
-                    autoAmount = settings.autoAmount || 10000;
-                    
-                    const toggle = document.getElementById('autoBuyToggle');
-                    if (toggle) toggle.checked = autoBuyEnabled;
-                    
-                    document.getElementById('thresholdInput').value = autoThreshold;
-                    document.getElementById('amountInput').value = autoAmount;
-                }
-            });
-        }
-
-        // ============================================
-        // FIREBASE WRITE OPERATIONS
-        // ============================================
-        async function updateMeterData(data) {
-            try {
-                await db.ref(`meters/${currentMeter}`).update(data);
-                return true;
             } catch (error) {
-                console.error("Update error:", error);
-                showToast("❌ Failed to update meter data", true);
+                console.error('Fetch error:', error);
+                document.getElementById('connStatus').className = 'connection-status status-disconnected';
+                document.getElementById('connStatus').innerHTML = '⚠️ Connection Error';
                 return false;
             }
         }
 
-        async function updateSettings(settings) {
-            try {
-                await db.ref(`settings/${currentMeter}`).update(settings);
-                return true;
-            } catch (error) {
-                console.error("Settings update error:", error);
-                showToast("❌ Failed to save settings", true);
-                return false;
-            }
-        }
+        // ===== VAT STATUS =====
+        function checkVATStatus() {
+            const badge = document.getElementById('vatStatusBadge');
+            const vatText = document.getElementById('vatStatusText');
 
-        // ============================================
-        // VAT FUNCTIONS
-        // ============================================
-        function calculateAndDisplayVAT() {
-            vatAmount = currentBalanceTZS * VAT_RATE;
-            
-            const vatDisplay = document.getElementById('vatAmount');
-            const vatBadge = document.getElementById('vatStatusBadge');
-            
-            vatDisplay.textContent = vatAmount.toLocaleString() + ' TZS';
-            
-            const now = new Date();
-            const key = `${currentMeter}_vat_paid_month`;
-            const stored = localStorage.getItem(key);
-            const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
-            
-            if (stored === monthKey) {
-                vatPaid = true;
-                vatBadge.className = 'vat-paid';
-                vatBadge.textContent = '● PAID';
-            } else {
-                vatPaid = false;
-                vatBadge.className = 'vat-pending';
-                vatBadge.textContent = '● PENDING';
-            }
-        }
-
-        async function payVAT() {
-            if (vatPaid) {
-                showToast('VAT already paid for this month', false);
-                return;
-            }
-            
-            if (currentBalanceTZS < vatAmount) {
-                showToast(`❌ Insufficient balance! VAT of ${vatAmount.toLocaleString()} TZS required.`, true);
-                return;
-            }
-            
-            const newBalance = currentBalanceTZS - vatAmount;
-            currentBalanceTZS = newBalance;
-            
-            await updateMeterData({ balance: newBalance });
-            
-            const now = new Date();
-            const key = `${currentMeter}_vat_paid_month`;
-            localStorage.setItem(key, `${now.getFullYear()}-${now.getMonth()}`);
-            
-            vatPaid = true;
-            showToast(`✅ VAT of ${vatAmount.toLocaleString()} TZS paid successfully!`, false);
-            
-            calculateAndDisplayVAT();
-            updateUI();
-        }
-
-        async function checkAndApplyMonthlyTax() {
-            const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
-            const key = `${currentMeter}_tax_paid_month`;
-            const stored = localStorage.getItem(key);
-            
-            if (stored === `${currentYear}-${currentMonth}`) {
-                taxPending = false;
-                updateTaxStatusDisplay();
-                return;
-            }
-            
-            if (currentBalanceTZS >= MONTHLY_TAX) {
-                const newBalance = currentBalanceTZS - MONTHLY_TAX;
-                currentBalanceTZS = newBalance;
-                await updateMeterData({ balance: newBalance });
-                localStorage.setItem(key, `${currentYear}-${currentMonth}`);
-                taxPending = false;
-                showToast(`💰 Monthly tax ${MONTHLY_TAX.toLocaleString()} TZS deducted`, false);
-                updateTaxStatusDisplay();
-            } else {
+            if (currentBalanceTZS < MONTHLY_TAX) {
                 taxPending = true;
-                updateTaxStatusDisplay();
-            }
-        }
-
-        function updateTaxStatusDisplay() {
-            const taxDiv = document.getElementById('taxStatusSimple');
-            const taxTextSpan = document.getElementById('taxStatusText');
-            if (taxPending) {
-                taxTextSpan.innerHTML = 'PENDING';
-                taxDiv.className = 'tax-status-simple pending';
+                badge.className = 'vat-status-badge pending';
+                vatText.innerHTML = 'PENDING';
             } else {
-                taxTextSpan.innerHTML = 'PAID';
-                taxDiv.className = 'tax-status-simple paid';
+                taxPending = false;
+                badge.className = 'vat-status-badge paid';
+                vatText.innerHTML = 'PAID';
             }
         }
 
-        // ============================================
-        // CORE FUNCTIONS
-        // ============================================
+        // ===== BUY UNITS =====
         async function buyUnitsFromBalance() {
             let amountToSpend = parseInt(document.getElementById('manualAmount').value);
             if (!amountToSpend || amountToSpend <= 0) {
@@ -1713,35 +1538,37 @@
                 showToast(`Insufficient balance! You have ${currentBalanceTZS.toLocaleString()} TZS.`, true);
                 return;
             }
-            
+
             const unitsToAdd = amountToSpend / RATE_PER_KWH;
             const oldUnits = currentUnits;
             const newBalance = currentBalanceTZS - amountToSpend;
             const newUnits = currentUnits + unitsToAdd;
-            
-            await updateMeterData({
-                balance: newBalance,
-                units: newUnits
-            });
-            
+
+            // Send to Blynk via TopUp pin (V6)
+            await sendCommandToMeter(PIN_TOPUP, amountToSpend);
+            await sendCommandToMeter(PIN_BALANCE, newBalance);
+            await sendCommandToMeter(PIN_ENERGY, newUnits);
+
             currentBalanceTZS = newBalance;
             currentUnits = newUnits;
-            
+
             showToast(`✅ Purchased ${amountToSpend.toLocaleString()} TZS = +${unitsToAdd.toFixed(2)} kWh`, false);
             document.getElementById('manualAmount').value = '';
-            
+
             updateUI();
-            
+            await fetchLiveData();
+
             if (oldUnits <= 0 && newUnits > 0 && !taxPending) {
-                await updateMeterData({ relay: 1 });
+                await sendCommandToMeter(PIN_RELAY, 1);
                 showPowerRestoredMessage();
             }
         }
 
+        // ===== ADD MONEY =====
         async function addMoneyToBalance() {
             const phone = document.getElementById('phoneNumber').value;
             const amount = parseInt(document.getElementById('mobileAmount').value);
-            
+
             if (!phone || phone.length < 8) {
                 showToast("Please enter a valid phone number", true);
                 return;
@@ -1750,37 +1577,46 @@
                 showToast("Please enter a valid amount", true);
                 return;
             }
-            
-            document.getElementById('paymentStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            
+
+            document.getElementById('paymentStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing payment...';
+
             setTimeout(async () => {
                 const newBalance = currentBalanceTZS + amount;
                 currentBalanceTZS = newBalance;
-                
-                await updateMeterData({ balance: newBalance });
+
+                await sendCommandToMeter(PIN_BALANCE, newBalance);
                 showToast(`✅ Added ${amount.toLocaleString()} TZS to meter balance.`);
                 document.getElementById('phoneNumber').value = '';
                 document.getElementById('mobileAmount').value = '';
                 document.getElementById('paymentStatus').innerHTML = '<span style="color: #ffd54f;">✅ Money added!</span>';
-                
+
                 updateUI();
+                await fetchLiveData();
                 setTimeout(() => { document.getElementById('paymentStatus').innerHTML = ''; }, 2000);
             }, 1500);
         }
 
+        // ===== CONTROL RELAY =====
         async function controlRelay(state) {
             if (state === 1) {
-                if (taxPending) { showToast(`❌ Cannot turn ON! Tax pending.`, true); return; }
-                if (currentUnits <= 0.05) { showToast(`❌ Cannot turn ON! No units available.`, true); return; }
+                if (taxPending) {
+                    showToast(`❌ Cannot turn ON! Monthly VAT pending.`, true);
+                    return;
+                }
+                if (currentUnits <= 0.05) {
+                    showToast(`❌ Cannot turn ON! No units available.`, true);
+                    return;
+                }
             }
-            await updateMeterData({ relay: state });
-            showToast(`✅ Relay turned ${state === 1 ? 'ON' : 'OFF'}`, false);
+            await sendCommandToMeter(PIN_RELAY, state);
+            await fetchLiveData();
         }
 
+        // ===== UPDATE UI =====
         function updateUI() {
             document.getElementById('balance').innerHTML = currentBalanceTZS.toLocaleString();
             document.getElementById('liveUnits').innerHTML = currentUnits.toFixed(2);
-            
+
             const onBtn = document.getElementById('relayOnBtn');
             const offBtn = document.getElementById('relayOffBtn');
             const noUnitsMsg = document.getElementById('noUnitsMsg');
@@ -1788,9 +1624,10 @@
             const taxLockMsg = document.getElementById('taxLockMsg');
             const warningDiv = document.getElementById('warningMsg');
             const warningText = document.getElementById('warningText');
-            
+
             const hasNoUnits = (currentUnits <= 0.02);
-            
+            const hasNoMoney = (currentBalanceTZS <= 0);
+
             if (taxPending) {
                 onBtn.disabled = true;
                 offBtn.disabled = false;
@@ -1798,18 +1635,16 @@
                 noUnitsMsg.style.display = 'none';
                 zeroFundsMsg.style.display = 'none';
                 warningDiv.style.display = 'block';
-                warningText.innerHTML = `🔴 TAX PENDING! Monthly tax of ${MONTHLY_TAX.toLocaleString()} TZS is due.`;
-            } 
-            else if (hasNoUnits && currentBalanceTZS > 0) {
+                warningText.innerHTML = `🔴 VAT PENDING! Monthly VAT of ${MONTHLY_TAX.toLocaleString()} TZS is due.`;
+            } else if (hasNoUnits && currentBalanceTZS > 0) {
                 onBtn.disabled = false;
                 offBtn.disabled = false;
                 noUnitsMsg.style.display = 'block';
                 taxLockMsg.style.display = 'none';
                 zeroFundsMsg.style.display = 'none';
                 warningDiv.style.display = 'block';
-                warningText.innerHTML = `🟡 Balance: ${currentBalanceTZS.toLocaleString()} TZS but NO UNITS!`;
-            } 
-            else if (currentBalanceTZS <= 0 && hasNoUnits) {
+                warningText.innerHTML = `🟡 Balance: ${currentBalanceTZS.toLocaleString()} TZS but NO UNITS! Buy units first.`;
+            } else if (currentBalanceTZS <= 0 && hasNoUnits) {
                 onBtn.disabled = true;
                 offBtn.disabled = true;
                 zeroFundsMsg.style.display = 'block';
@@ -1817,8 +1652,7 @@
                 taxLockMsg.style.display = 'none';
                 warningDiv.style.display = 'block';
                 warningText.innerHTML = '🔴 EMERGENCY: Add money, then buy units.';
-            } 
-            else if (currentUnits <= 2.0 && currentUnits > 0) {
+            } else if (currentUnits <= 2.0 && currentUnits > 0) {
                 onBtn.disabled = false;
                 offBtn.disabled = false;
                 noUnitsMsg.style.display = 'none';
@@ -1826,8 +1660,7 @@
                 taxLockMsg.style.display = 'none';
                 warningDiv.style.display = 'block';
                 warningText.innerHTML = `⚠️ LOW UNITS! Only ${currentUnits.toFixed(2)} kWh remaining.`;
-            } 
-            else {
+            } else {
                 onBtn.disabled = false;
                 offBtn.disabled = false;
                 noUnitsMsg.style.display = 'none';
@@ -1838,7 +1671,7 @@
         }
 
         function setManualAmount(amount) { document.getElementById('manualAmount').value = amount; }
-        
+
         function selectProvider(provider) {
             selectedProvider = provider;
             document.querySelectorAll('.provider-btn').forEach(btn => btn.classList.remove('selected'));
@@ -1851,56 +1684,54 @@
             setTimeout(() => { msgDiv.style.display = 'none'; }, 5000);
         }
 
-        // ============================================
-        // AUTO BUY FUNCTIONS
-        // ============================================
-        async function saveAutoBuySettings() {
+        // ===== AUTO BUY =====
+        function saveAutoBuySettings() {
             autoThreshold = parseFloat(document.getElementById('thresholdInput').value);
             autoAmount = parseFloat(document.getElementById('amountInput').value);
-            
-            await updateSettings({
-                autoThreshold: autoThreshold,
-                autoAmount: autoAmount
-            });
-            
+            if (currentMeter) {
+                localStorage.setItem(`${currentMeter}_auto_threshold`, autoThreshold);
+                localStorage.setItem(`${currentMeter}_auto_amount`, autoAmount);
+            }
             showToast(`Auto buy settings saved! Threshold: ${autoThreshold} kWh, Amount: ${autoAmount.toLocaleString()} TZS`);
         }
 
         function loadAutoBuySettings() {
+            if (currentMeter) {
+                const savedThreshold = localStorage.getItem(`${currentMeter}_auto_threshold`);
+                const savedAmount = localStorage.getItem(`${currentMeter}_auto_amount`);
+                if (savedThreshold !== null) autoThreshold = parseFloat(savedThreshold);
+                if (savedAmount !== null) autoAmount = parseFloat(savedAmount);
+            }
             document.getElementById('thresholdInput').value = autoThreshold;
             document.getElementById('amountInput').value = autoAmount;
-            
-            const toggle = document.getElementById('autoBuyToggle');
-            if (toggle) toggle.checked = autoBuyEnabled;
         }
 
         async function checkAndPerformAutoBuy() {
             if (!autoBuyEnabled) return false;
             if (autoBuyTriggeredRecently) return false;
             if (taxPending) return false;
-            
+
             if (currentUnits <= autoThreshold && currentUnits > 0) {
                 if (currentBalanceTZS >= autoAmount) {
                     autoBuyTriggeredRecently = true;
                     const unitsToAdd = autoAmount / RATE_PER_KWH;
                     const newBalance = currentBalanceTZS - autoAmount;
                     const newUnits = currentUnits + unitsToAdd;
-                    
-                    await updateMeterData({
-                        balance: newBalance,
-                        units: newUnits
-                    });
-                    
+
+                    await sendCommandToMeter(PIN_BALANCE, newBalance);
+                    await sendCommandToMeter(PIN_ENERGY, newUnits);
+
                     currentBalanceTZS = newBalance;
                     currentUnits = newUnits;
-                    
+
                     const autoMsg = document.getElementById('autoNotificationMsg');
                     autoMsg.innerHTML = `<i class="fas fa-robot" style="color: #64b5f6;"></i> <strong>AUTO BUY!</strong> Purchased ${autoAmount.toLocaleString()} TZS = ${unitsToAdd.toFixed(2)} kWh`;
                     autoMsg.style.background = 'rgba(33, 150, 243, 0.05)';
                     showToast(`🤖 AUTO BUY! +${unitsToAdd.toFixed(2)} kWh`, false);
                     setTimeout(() => { autoMsg.innerHTML = ''; }, 8000);
-                    
+
                     updateUI();
+                    await fetchLiveData();
                     setTimeout(() => { autoBuyTriggeredRecently = false; }, 10000);
                     return true;
                 }
@@ -1908,13 +1739,9 @@
             return false;
         }
 
-        async function toggleAutoBuyUnits() {
-            const toggle = document.getElementById('autoBuyToggle');
-            autoBuyEnabled = toggle.checked;
+        function toggleAutoBuyUnits() {
+            autoBuyEnabled = document.getElementById('autoBuyToggle').checked;
             autoBuyTriggeredRecently = false;
-            
-            await updateSettings({ autoBuyEnabled: autoBuyEnabled });
-            
             const autoMsg = document.getElementById('autoNotificationMsg');
             if (autoBuyEnabled) {
                 autoMsg.innerHTML = `<i class="fas fa-check-circle" style="color: #64b5f6;"></i> <strong>AUTO BUY ENABLED!</strong> Will buy ${autoAmount.toLocaleString()} TZS when units ≤ ${autoThreshold} kWh.`;
@@ -1926,28 +1753,71 @@
             }
         }
 
-        // ============================================
-        // INIT
-        // ============================================
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                isLoggedIn = true;
+        // ===== LOGIN / LOGOUT =====
+        function login() {
+            const meterId = document.getElementById('meterId').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!meterId || !password) { showToast("Please enter Meter ID and Password", true); return; }
+
+            if (meters[meterId] && meters[meterId].password === password) {
+                currentMeter = meterId;
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
-                showToast(`✅ Welcome back ${user.email}`, false);
-                startFirebaseSync();
+                document.getElementById('displayMeterId').innerHTML = meterId;
+
+                loadAutoBuySettings();
+
+                if (window.liveInterval) clearInterval(window.liveInterval);
+                window.liveInterval = setInterval(async () => {
+                    if (currentMeter) {
+                        await fetchLiveData();
+                        if (autoBuyEnabled) await checkAndPerformAutoBuy();
+                    }
+                }, 3500);
+
+                fetchLiveData().then(() => {
+                    if (autoBuyEnabled) checkAndPerformAutoBuy();
+                });
+                showToast(`Connected to meter ${meterId}`);
             } else {
-                isLoggedIn = false;
-                document.getElementById('dashboard').style.display = 'none';
-                document.getElementById('loginScreen').style.display = 'block';
+                showToast("Invalid Meter ID or Password", true);
+            }
+        }
+
+        function logout() {
+            currentMeter = null;
+            if (window.liveInterval) clearInterval(window.liveInterval);
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('meterId').value = 'MTR001';
+            document.getElementById('password').value = '';
+            document.getElementById('connStatus').className = 'connection-status status-disconnected';
+            document.getElementById('connStatus').innerHTML = '🔴 Disconnected';
+            showToast("Logged out successfully");
+        }
+
+        // ===== AUTO-RECONNECT =====
+        window.addEventListener('online', () => {
+            if (currentMeter) {
+                showToast('🌐 Internet restored! Reconnecting...', false);
+                fetchLiveData();
             }
         });
 
-        setInterval(async () => {
-            if (isLoggedIn && autoBuyEnabled) {
-                await checkAndPerformAutoBuy();
-            }
-        }, 5000);
+        window.addEventListener('offline', () => {
+            document.getElementById('connStatus').className = 'connection-status status-disconnected';
+            document.getElementById('connStatus').innerHTML = '📡 No Internet';
+        });
+
+        // ===== INIT =====
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loginScreen').style.display = 'flex';
+        });
+
+        console.log('🚀 Smart Meter Portal Ready');
+        console.log('📊 Pin Mapping: V0=Voltage, V1=Current, V2=Power, V3=Energy, V4=Balance, V5=Relay, V6=TopUp');
+        console.log('🔑 Token: ' + BLYNK_TOKEN);
     </script>
 </body>
 </html>
